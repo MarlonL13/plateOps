@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Prisma
+prisma/dev.db
+prisma/*.sqlite
+prisma/migrations/
+
+# Build output
+dist/
+build/
+coverage/
+
+# Vite
+.vite/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Others
+*.tgz
+.idea/
+*.swp

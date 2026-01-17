@@ -1,0 +1,95 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    WAITER
+    KITCHEN
+    CASHIER
+}
+
+enum TableStatus {
+    OPEN
+    CLOSED
+}
+
+enum OrderStatus {
+    PENDING
+    IN_PROGRESS
+    READY
+    PAID
+}
+
+model User {
+    id           String   @id @default(cuid())
+    username     String   @unique
+    passwordHash String
+    role         UserRole
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    orders Order[]
+}
+
+model Table {
+    id        String      @id @default(cuid())
+    number    Int         @unique
+    status    TableStatus @default(OPEN)
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+
+    orders  Order[]
+    payment Payment?
+}
+
+model MenuItem {
+    id        String   @id @default(cuid())
+    name      String
+    price     Decimal
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    orderItems OrderItem[]
+}
+
+model Order {
+    id        String      @id @default(cuid())
+    tableId   String
+    waiterId  String
+    status    OrderStatus @default(PENDING)
+    notes     String?
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+
+    table   Table       @relation(fields: [tableId], references: [id])
+    waiter  User        @relation(fields: [waiterId], references: [id])
+    items   OrderItem[]
+    payment Payment?
+}
+
+model OrderItem {
+    id         String   @id @default(cuid())
+    orderId    String
+    menuItemId String
+    quantity   Int      @default(1)
+    createdAt  DateTime @default(now())
+
+    order    Order    @relation(fields: [orderId], references: [id])
+    menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model Payment {
+    id      String   @id @default(cuid())
+    orderId String?  @unique
+    tableId String?  @unique
+    total   Decimal
+    paidAt  DateTime @default(now())
+
+    order Order? @relation(fields: [orderId], references: [id])
+    table Table? @relation(fields: [tableId], references: [id])
+}
