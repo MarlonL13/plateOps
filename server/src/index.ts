@@ -6,7 +6,8 @@ import { registerSocket } from "./socket";
 const app = createApp();
 const server = http.createServer(app);
 
-registerSocket(server);
+const { emitRefresh } = registerSocket(server);
+app.locals.emitRefresh = emitRefresh;
 
 server.listen(env.port, () => {
   console.log(`PlateOps API running on port ${env.port}`);

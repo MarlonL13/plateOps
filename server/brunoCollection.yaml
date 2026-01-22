@@ -1,0 +1,122 @@
+info:
+  name: PlateOps API
+  description: OpenCollection for PlateOps MVP
+  schema: https://opencollection.io/schema/v1
+
+requests:
+  - name: Health Check
+    method: GET
+    url: http://localhost:3000/api/health
+
+  - name: Login (Waiter)
+    method: POST
+    url: http://localhost:3000/api/auth/login
+    headers:
+      - name: Content-Type
+        value: application/json
+    body:
+      type: json
+      json:
+        username: waiter1
+        password: waiter
+
+  - name: Get All Tables
+    method: GET
+    url: http://localhost:3000/api/orders
+    headers:
+      - name: Authorization
+        value: Bearer {{token}}
+
+  - name: Create Order
+    method: POST
+    url: http://localhost:3000/api/orders/create
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Authorization
+        value: Bearer {{token}}
+    body:
+      type: json
+      json:
+        tableId: "{{tableId}}"
+        waiterId: "{{waiterId}}"
+        notes: No onions
+        items:
+          - menuItemId: "{{menuItemId}}"
+            quantity: 2
+
+  - name: Get All Orders (Kitchen)
+    method: GET
+    url: http://localhost:3000/api/orders/all
+    headers:
+      - name: Authorization
+        value: Bearer {{token}}
+
+  - name: Get All Orders (Cashier)
+    method: GET
+    url: http://localhost:3000/api/orders/cashier
+    headers:
+      - name: Authorization
+        value: Bearer {{token}}
+
+  - name: Get Table Data
+    method: POST
+    url: http://localhost:3000/api/orders/table
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Authorization
+        value: Bearer {{token}}
+    body:
+      type: json
+      json:
+        tableNumber: 1
+
+  - name: Update Order Status
+    method: POST
+    url: http://localhost:3000/api/orders/update-status
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Authorization
+        value: Bearer {{token}}
+    body:
+      type: json
+      json:
+        orderId: "{{orderId}}"
+
+  - name: Pay Orders (Table)
+    method: POST
+    url: http://localhost:3000/api/orders/pay
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: Authorization
+        value: Bearer {{token}}
+    body:
+      type: json
+      json:
+        tableNumber: 1
+
+  - name: Get All Itens
+    method: GET
+    url: http://localhost:3000/api/itens
+    headers:
+      - name: Authorization
+        value: Bearer {{token}}
+
+  - name: Socket.io Refresh Event (Script)
+    method: SCRIPT
+    script: |
+      // Run this in Bruno's script runner or Node.js
+      const { io } = require('socket.io-client');
+      const socket = io('http://localhost:3000', {
+        withCredentials: true
+      });
+      socket.on('connect', () => {
+        console.log('Connected:', socket.id);
+      });
+      socket.on('refresh', () => {
+        console.log('Received refresh event!');
+        socket.disconnect();
+      });

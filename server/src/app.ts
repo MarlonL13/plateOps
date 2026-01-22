@@ -2,7 +2,10 @@ import cors from "cors";
 import express from "express";
 import { env } from "./config/env";
 import { healthRouter } from "./routes/health";
-import { authRouter } from "./routes/auth";
+import morgan from "morgan";
+import { authRouter } from "./routes/auth/auth";
+import { ordersRouter } from "./routes/orders/index";
+import { itensRouter } from "./routes/itens";
 
 export const createApp = () => {
   const app = express();
@@ -14,9 +17,12 @@ export const createApp = () => {
     }),
   );
   app.use(express.json());
+  app.use(morgan("dev"));
 
   app.use("/api/health", healthRouter);
   app.use("/api/auth", authRouter);
+  app.use("/api/orders", ordersRouter);
+  app.use("/api/itens", itensRouter);
 
   return app;
 };
