@@ -26,7 +26,7 @@ enum OrderStatus {
 }
 
 model User {
-    id           String   @id @default(cuid())
+    id           String   @id @default(uuid())
     username     String   @unique
     passwordHash String
     role         UserRole
@@ -37,7 +37,7 @@ model User {
 }
 
 model Table {
-    id        String      @id @default(cuid())
+    id        String      @id @default(uuid())
     number    Int         @unique
     status    TableStatus @default(OPEN)
     createdAt DateTime    @default(now())
@@ -48,9 +48,10 @@ model Table {
 }
 
 model MenuItem {
-    id        String   @id @default(cuid())
+    id        String   @id @default(uuid())
     name      String
-    price     Decimal
+    price     Decimal  @db.Decimal(10, 2)
+    category  String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -58,7 +59,7 @@ model MenuItem {
 }
 
 model Order {
-    id        String      @id @default(cuid())
+    id        String      @id @default(uuid())
     tableId   String
     waiterId  String
     status    OrderStatus @default(PENDING)
@@ -73,21 +74,21 @@ model Order {
 }
 
 model OrderItem {
-    id         String   @id @default(cuid())
+    id         String   @id @default(uuid())
     orderId    String
-    menuItemId String
+    menuItemId String? 
     quantity   Int      @default(1)
     createdAt  DateTime @default(now())
 
     order    Order    @relation(fields: [orderId], references: [id])
-    menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+    menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
 }
 
 model Payment {
-    id      String   @id @default(cuid())
+    id      String   @id @default(uuid())
     orderId String?  @unique
     tableId String?  @unique
-    total   Decimal
+    total   Decimal  @db.Decimal(10, 2)
     paidAt  DateTime @default(now())
 
     order Order? @relation(fields: [orderId], references: [id])
