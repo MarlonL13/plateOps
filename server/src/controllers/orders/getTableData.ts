@@ -36,25 +36,28 @@ export const getTableData = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Table not found" });
     }
 
-    const orders = table.orders.map((order) => {
-      const items = order.items.map((item) => ({
-        id: item.id,
-        name: item.menuItem?.name ?? null,
-        price: item.menuItem ? Number(item.menuItem.price) : null,
-        quantity: item.quantity,
-        total: item.menuItem ? Number(item.menuItem.price) * item.quantity : 0,
-      }));
+    // Filter out PAID orders defensively in JS
+    const orders = table.orders
+      .filter((order) => order.status !== "PAID")
+      .map((order) => {
+        const items = order.items.map((item) => ({
+          id: item.id,
+          name: item.menuItem?.name ?? null,
+          price: item.menuItem ? Number(item.menuItem.price) : null,
+          quantity: item.quantity,
+          total: item.menuItem ? Number(item.menuItem.price) * item.quantity : 0,
+        }));
 
-      const orderTotal = items.reduce((sum, item) => sum + item.total, 0);
+        const orderTotal = items.reduce((sum, item) => sum + item.total, 0);
 
-      return {
-        orderId: order.id,
-        status: order.status,
-        createdAt: order.createdAt,
-        items,
-        orderTotal,
-      };
-    });
+        return {
+          orderId: order.id,
+          status: order.status,
+          createdAt: order.createdAt,
+          items,
+          orderTotal,
+        };
+      });
 
     const tableTotal = orders.reduce((sum, order) => sum + order.orderTotal, 0);
 
