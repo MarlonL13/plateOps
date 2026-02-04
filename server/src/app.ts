@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { authRouter } from "./routes/auth/auth";
 import { ordersRouter } from "./routes/orders/index";
 import { itensRouter } from "./routes/itens";
+import { paymentsRouter } from "./routes/payments";
 
 export const createApp = () => {
   const app = express();
@@ -23,6 +24,7 @@ export const createApp = () => {
   app.use("/api/auth", authRouter);
   app.use("/api/orders", ordersRouter);
   app.use("/api/itens", itensRouter);
+  app.use("api/payments", paymentsRouter)
 
   return app;
 };
