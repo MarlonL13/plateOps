@@ -17,7 +17,6 @@ logs/
 # Prisma
 prisma/dev.db
 prisma/*.sqlite
-prisma/migrations/
 
 # Build output
 dist/
