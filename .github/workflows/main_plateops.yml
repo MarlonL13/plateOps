@@ -1,58 +1,34 @@
-name: Build and deploy Node.js app to Azure Web App - plateops
+name: Deploy compiled Node app to Azure
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 24
-          cache: 'npm'
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run build
 
-      - name: Build project
-        run: npm run build
-
-      - name: Remove dev dependencies
-        run: npm prune --production
-
-      - name: Upload production artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: |
-            dist
-            package.json
-            package-lock.json
-            node_modules
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
+      # Create a clean production folder
+      - name: Prepare production package
+        run: |
+          mkdir production
+          cp -r dist production/
+          cp package.json production/
+          cp package-lock.json production/
+          cd production
+          npm ci --omit=dev
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -61,9 +37,8 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D4A08B58510C402D9547BA7F1EF9E2D1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4FEB260AE5484A11886ABDEAD76578C9 }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: plateops
-          slot-name: Production
-          package: .
+          package: production
