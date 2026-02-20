@@ -13,7 +13,7 @@ PlateOps is a comprehensive, full-stack restaurant management system designed to
 
 ## Tech Stack
 
-The project is a monorepo containing a separate client and server.
+The project is a monorepo containing a separate client and server..
 
 - **Backend (`/server`)**:
   - **Framework**: Node.js with Express.js
