@@ -1,34 +1,62 @@
-name: Deploy compiled Node app to Azure
+name: Build and deploy Node.js app to Azure Web App - plateops
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
         with:
           node-version: 24
-          cache: npm
+          cache: 'npm'
 
-      - run: npm ci
-      - run: npm run build
+      - name: Install dependencies
+        run: npm ci
 
-      # Create a clean production folder
-      - name: Prepare production package
-        run: |
-          mkdir production
-          cp -r dist production/
-          cp package.json production/
-          cp package-lock.json production/
-          cd production
-          npm ci --omit=dev
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build project
+        run: npm run build
+
+      - name: Remove dev dependencies
+        run: npm prune --production
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: |
+            dist
+            prisma
+            package.json
+            package-lock.json
+            node_modules
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -37,8 +65,16 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D4A08B58510C402D9547BA7F1EF9E2D1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4FEB260AE5484A11886ABDEAD76578C9 }}
 
-      - name: Deploy to Azure
+      - name: Set Azure Web App startup command
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: plateops
+          app-settings-json: '[{"name": "WEBSITE_RUN_FROM_PACKAGE", "value": "0"}]'
+          general-settings-json: '{"linuxFxVersion": "NODE|20-lts", "appCommandLine": "node dist/index.js"}'
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: plateops
-          package: production
+          slot-name: Production
+          package: .
