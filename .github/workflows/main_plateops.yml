@@ -25,9 +25,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
       - name: Build project
         run: npm run build
 
@@ -40,7 +37,6 @@ jobs:
           name: node-app
           path: |
             dist
-            prisma
             package.json
             package-lock.json
             node_modules
@@ -64,13 +60,6 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2507780B9EAA4100B36DC4E7C53EA4C8 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D4A08B58510C402D9547BA7F1EF9E2D1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4FEB260AE5484A11886ABDEAD76578C9 }}
-
-      - name: Set Azure Web App startup command
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: plateops
-          app-settings-json: '[{"name": "WEBSITE_RUN_FROM_PACKAGE", "value": "0"}]'
-          general-settings-json: '{"linuxFxVersion": "NODE|20-lts", "appCommandLine": "node dist/index.js"}'
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
