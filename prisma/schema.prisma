@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlserver"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
@@ -44,7 +44,7 @@ model Order {
     id        String      @id @default(uuid())
     tableId   String
     waiterId  String
-    status    String @default("PENDING")
+    status    String      @default("PENDING")
     notes     String?
     createdAt DateTime    @default(now())
     updatedAt DateTime    @updatedAt

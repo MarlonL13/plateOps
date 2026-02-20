@@ -25,7 +25,6 @@ export const stripeWebhook = async (req: Request, res: Response) => {
     const tableNumber = paymentIntent.metadata.tableNumber;
 
     if (tableNumber) {
-      // Call your payOrders logic to mark orders as paid
       // Mock a request/response for payOrders
       const mockReq = {
         body: { tableNumber: Number(tableNumber) },

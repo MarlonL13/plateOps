@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import {  OrderStatus } from "@prisma/client";
 import prisma from "../../prisma";
 
 export const getAllTables = async (req: Request, res: Response) => {
@@ -9,7 +8,7 @@ export const getAllTables = async (req: Request, res: Response) => {
         orders: {
           where: {
             status: {
-              in: [OrderStatus.PENDING, OrderStatus.IN_PROGRESS, OrderStatus.READY],
+              in: ["PENDING", "IN_PROGRESS", "READY"],
             },
           },
           orderBy: {

@@ -1,14 +1,15 @@
-import express from "express";
 import { Router } from "express";
+import express from "express";
 import { createPayment } from "../../controllers/payments/createPayment";
-import { requireAuth } from "../../middleware/auth";
+import { processCashPayment } from "../../controllers/payments/cashPayments";
 import { stripeWebhook } from "../../controllers/payments/webhook";
 
-export const paymentsRouter = Router();
+const paymentsRouter = Router();
 
-paymentsRouter.post("/createPayments", requireAuth, createPayment);
-paymentsRouter.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  stripeWebhook
-);
+// Credit Card Payment Intent
+paymentsRouter.post("/create-payment", createPayment);
+
+// Cash Payment
+paymentsRouter.post("/cash", processCashPayment);
+
+export { paymentsRouter };

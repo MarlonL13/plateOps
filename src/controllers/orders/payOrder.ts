@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 import prisma from "../../prisma";
 
@@ -25,7 +24,7 @@ export const payOrders = async (req: Request, res: Response) => {
       where: { number: tableNumber },
       include: {
         orders: {
-          where: { status: { not: OrderStatus.PAID } },
+          where: { status: { not: "PAID" } },
         },
       },
     });
@@ -44,9 +43,9 @@ export const payOrders = async (req: Request, res: Response) => {
     const updatedOrders = await prisma.order.updateMany({
       where: {
         tableId: table.id,
-        status: { not: OrderStatus.PAID },
+        status: { not: "PAID" },
       },
-      data: { status: OrderStatus.PAID },
+      data: { status: "PAID" },
     });
 
     emitRefresh();

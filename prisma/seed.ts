@@ -1,9 +1,4 @@
-import {
-  PrismaClient,
-  UserRole,
-  TableStatus,
-  OrderStatus,
-} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import bcrypt from "bcrypt";
 
@@ -28,21 +23,21 @@ async function main() {
     data: {
       username: "waiter1",
       passwordHash: password1,
-      role: UserRole.WAITER,
+      role: "WAITER", // Use string
     },
   });
   await prisma.user.create({
     data: {
       username: "kitchen1",
       passwordHash: password2,
-      role: UserRole.KITCHEN,
+      role: "KITCHEN", // Use string
     },
   });
   await prisma.user.create({
     data: {
       username: "cashier1",
       passwordHash: password3,
-      role: UserRole.CASHIER,
+      role: "CASHIER", // Use string
     },
   });
 
@@ -53,7 +48,7 @@ async function main() {
       await prisma.table.create({
         data: {
           number: i,
-          status: TableStatus.OPEN,
+          status: "OPEN", // Use string
         },
       })
     );
@@ -103,7 +98,7 @@ async function main() {
     data: {
       tableId: tables[0].id,
       waiterId: waiter.id,
-      status: OrderStatus.PENDING,
+      status: "PENDING",
       notes: "No onions",
       items: {
         create: [
