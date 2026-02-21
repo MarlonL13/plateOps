@@ -22,30 +22,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '24.x'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Build project
-        run: npm run build
-
-      - name: Remove dev dependencies
-        run: npm prune --production
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            dist
-            prisma
-            package.json
-            package-lock.json
-            node_modules
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -67,15 +55,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D4A08B58510C402D9547BA7F1EF9E2D1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4FEB260AE5484A11886ABDEAD76578C9 }}
 
-      - name: Set Azure Web App startup command
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: plateops
-          general-settings-json: '{ "linuxFxVersion": "NODE|24-lts", "appCommandLine": "node dist/index.js" }'
-
-      - name: Deploy to Azure Web App
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: plateops
-          slot-name: Production
+          app-name: 'plateops'
+          slot-name: 'Production'
           package: .
+          
