@@ -71,7 +71,7 @@ jobs:
         uses: azure/appservice-settings@v1
         with:
           app-name: plateops
-          general-settings-json: '{ "linuxFxVersion": "NODE|20-lts", "appCommandLine": "node dist/index.js" }'
+          general-settings-json: '{ "linuxFxVersion": "NODE|24-lts", "appCommandLine": "node dist/index.js" }'
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
