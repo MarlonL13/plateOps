@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 
 import prisma from "../../prisma";
@@ -34,7 +33,7 @@ export const createOrder = async (req: Request, res: Response) => {
         tableId,
         waiterId,
         notes,
-        status: OrderStatus.PENDING,
+        status: "PENDING",
         items: {
           create: items.map((item: { menuItemId: string; quantity: number }) => ({
             menuItemId: item.menuItemId,

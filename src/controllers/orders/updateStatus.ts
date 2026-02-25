@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 import prisma from "../../prisma";
 
@@ -28,11 +27,11 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    let newStatus: OrderStatus;
-    if (order.status === OrderStatus.PENDING) {
-      newStatus = OrderStatus.IN_PROGRESS;
-    } else if (order.status === OrderStatus.IN_PROGRESS) {
-      newStatus = OrderStatus.READY;
+      let newStatus: string;
+    if (order.status === "PENDING") {
+      newStatus = "IN_PROGRESS";
+    } else if (order.status === "IN_PROGRESS") {
+      newStatus = "READY";
     } else {
       return res.status(400).json({ error: "Order status cannot be updated further" });
     }
