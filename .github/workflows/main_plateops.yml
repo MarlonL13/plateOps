@@ -1,168 +1,65 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-# Nome visível do workflow no GitHub Actions.
 name: Build and deploy Node.js app to Azure Web App - plateops
 
 on:
-  # Dispara automaticamente em push na branch principal.
   push:
     branches:
       - main
-  # Permite execução manual pelo botão "Run workflow".
   workflow_dispatch:
 
 jobs:
-  # Job 1: compila o projeto, gera o Prisma Client e publica artifact.
   build:
     runs-on: ubuntu-latest
     permissions:
-      # Permissão mínima para ler o repositório e fazer checkout do código.
       contents: read #This is required for actions/checkout
 
     steps:
-      # Baixa o código da branch/commit que acionou o workflow.
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          # Mantido em 24.x conforme sua configuração atual do App Service.
           node-version: '24.x'
 
       - name: npm install, build, and test
         run: |
-          # Instala dependências de forma determinística (usa package-lock.json).
-          npm ci
-          # Gera o build de produção (dist/) se o script existir.
+          npm install
           npm run build --if-present
-          # Gera o Prisma Client (inclui node_modules/.prisma), essencial em runtime.
-          npx prisma generate
-          # Executa testes se o script existir.
           npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          # Nome do pacote compartilhado com o próximo job.
           name: node-app
-          # Envia todo o conteúdo do workspace atual.
           path: .
-          # CRÍTICO para Prisma: inclui pastas ocultas como node_modules/.prisma.
-          include-hidden-files: true
 
-  # Job 2: baixa o artifact, aplica migrations e publica no App Service.
   deploy:
     runs-on: ubuntu-latest
-    # Só executa se o build terminar com sucesso.
     needs: build
-    env:
-      # Connection string do SQL Server usada pelo Prisma no migrate deploy.
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     permissions:
-      # Necessário para autenticação federada (OIDC) com azure/login.
       id-token: write #This is required for requesting the JWT
-      # Necessário para ler metadados/conteúdo do repositório quando preciso.
       contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          # Mesmo nome definido no upload do job build.
           name: node-app
-
-      - name: Install dependencies for migration
-        # Reinstala dependências no runner do job deploy para comandos Prisma.
-        run: npm ci
-
-      - name: Validate DATABASE_URL secret
-        # Evita erro genérico do Prisma quando o secret não foi configurado.
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "DATABASE_URL is empty. Configure the GitHub Actions secret DATABASE_URL with your SQL Server connection string.";
-            exit 1;
-          fi
-
-      - name: Apply Prisma migrations
-        # Aplica somente migrations já versionadas em prisma/migrations.
-        # Se falhar aqui, o deploy é interrompido (evita app nova com schema antigo).
-        run: |
-          max_attempts=5
-          attempt=1
-
-          while [ $attempt -le $max_attempts ]; do
-            echo "Running Prisma migration (attempt $attempt/$max_attempts)..."
-
-            if npx prisma migrate deploy; then
-              echo "Prisma migration applied successfully."
-              exit 0
-            fi
-
-            if [ $attempt -lt $max_attempts ]; then
-              wait_seconds=$((attempt * 20))
-              echo "Migration failed. Retrying in ${wait_seconds}s..."
-              sleep $wait_seconds
-            fi
-
-            attempt=$((attempt + 1))
-          done
-
-          echo "Migration failed after ${max_attempts} attempts."
-          exit 1
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          # Autenticação via Service Principal + OIDC (sem publish profile).
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_87D6C28D45C14115ABB2F26A632AA027 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C070278D3D16468ABF9DB5ED9ACFEF23 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4D41E40DB08A49E282C3E2C6DB9DDC46 }}
-
-      - name: Resolve Web App resource group
-        run: |
-          RESOURCE_GROUP=$(az resource list --name plateops --resource-type "Microsoft.Web/sites" --query "[0].resourceGroup" -o tsv)
-
-          if [ -z "$RESOURCE_GROUP" ]; then
-            echo "Unable to resolve resource group for Web App 'plateops'."
-            exit 1
-          fi
-
-          echo "RESOURCE_GROUP=$RESOURCE_GROUP" >> $GITHUB_ENV
-          echo "Resolved RESOURCE_GROUP=$RESOURCE_GROUP"
-
-      - name: Ensure Web App is enabled and running
-        run: |
-          az resource update --resource-group "$RESOURCE_GROUP" --resource-type "Microsoft.Web/sites" --name "plateops" --set properties.enabled=true
-          az webapp start --resource-group "$RESOURCE_GROUP" --name "plateops"
-
-          max_checks=12
-          check=1
-
-          while [ $check -le $max_checks ]; do
-            state=$(az webapp show --resource-group "$RESOURCE_GROUP" --name "plateops" --query "state" -o tsv)
-            echo "Web App state check $check/$max_checks: $state"
-
-            if [ "$state" = "Running" ]; then
-              echo "Web App is running and ready for deployment."
-              exit 0
-            fi
-
-            sleep 10
-            check=$((check + 1))
-          done
-
-          echo "Web App did not reach Running state before deployment."
-          exit 1
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_95E7EECFF47C47A3B6B2E1D598A93A97 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1C22373ADE1B487CA7DDA73FFFF0841C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D47F965547EF4BFE91AC8F48B887A6D0 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          # Nome do Web App no Azure App Service.
           app-name: 'plateops'
-          # Slot de destino; aqui é produção direta.
           slot-name: 'Production'
-          # Pacote a ser publicado (conteúdo baixado do artifact).
           package: .
           
