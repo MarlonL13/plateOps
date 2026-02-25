@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 # Nome visível do workflow no GitHub Actions.
-name: Build and deploy Node.js app to Azure Web App - plateopsok
+name: Build and deploy Node.js app to Azure Web App - plateops
 
 on:
   # Dispara automaticamente em push na branch principal.
@@ -115,16 +115,16 @@ jobs:
         uses: azure/login@v2
         with:
           # Autenticação via Service Principal + OIDC (sem publish profile).
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C29156A271F3443DBF18059B2E399EEB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_43215B1D714C477883209DAD30EB8131 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EC38BA1E8C03424EB0142FB2E15F3FBB }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_87D6C28D45C14115ABB2F26A632AA027 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C070278D3D16468ABF9DB5ED9ACFEF23 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4D41E40DB08A49E282C3E2C6DB9DDC46 }}
 
       - name: Resolve Web App resource group
         run: |
-          RESOURCE_GROUP=$(az resource list --name plateopsok --resource-type "Microsoft.Web/sites" --query "[0].resourceGroup" -o tsv)
+          RESOURCE_GROUP=$(az resource list --name plateops --resource-type "Microsoft.Web/sites" --query "[0].resourceGroup" -o tsv)
 
           if [ -z "$RESOURCE_GROUP" ]; then
-            echo "Unable to resolve resource group for Web App 'plateopsok'."
+            echo "Unable to resolve resource group for Web App 'plateops'."
             exit 1
           fi
 
@@ -133,14 +133,14 @@ jobs:
 
       - name: Ensure Web App is enabled and running
         run: |
-          az resource update --resource-group "$RESOURCE_GROUP" --resource-type "Microsoft.Web/sites" --name "plateopsok" --set properties.enabled=true
-          az webapp start --resource-group "$RESOURCE_GROUP" --name "plateopsok"
+          az resource update --resource-group "$RESOURCE_GROUP" --resource-type "Microsoft.Web/sites" --name "plateops" --set properties.enabled=true
+          az webapp start --resource-group "$RESOURCE_GROUP" --name "plateops"
 
           max_checks=12
           check=1
 
           while [ $check -le $max_checks ]; do
-            state=$(az webapp show --resource-group "$RESOURCE_GROUP" --name "plateopsok" --query "state" -o tsv)
+            state=$(az webapp show --resource-group "$RESOURCE_GROUP" --name "plateops" --query "state" -o tsv)
             echo "Web App state check $check/$max_checks: $state"
 
             if [ "$state" = "Running" ]; then
@@ -160,7 +160,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           # Nome do Web App no Azure App Service.
-          app-name: 'plateopsok'
+          app-name: 'plateops'
           # Slot de destino; aqui é produção direta.
           slot-name: 'Production'
           # Pacote a ser publicado (conteúdo baixado do artifact).
