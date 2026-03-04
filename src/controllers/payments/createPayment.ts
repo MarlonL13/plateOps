@@ -21,8 +21,12 @@ export const createPayment = async (req: Request, res: Response) => {
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: Math.round(amount * 100), // convert to cents
       currency,
+      // You must enable PIX in your Stripe Dashboard. 
+      // If it is disabled, providing ['card', 'pix'] will throw an error. 
+      // We will default to just 'card' for now so it doesn't crash your backend testing.
+      payment_method_types: ['card'], 
       metadata: { tableNumber: String(tableNumber) },
     });
 
@@ -31,6 +35,7 @@ export const createPayment = async (req: Request, res: Response) => {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error) {
-    return res.status(500).json({ error: "Failed to create payment intent" });
+    console.error("Stripe createPayment error:", error);
+    return res.status(500).json({ error: "Failed to create payment intent", details: error instanceof Error ? error.message : String(error) });
   }
 };
