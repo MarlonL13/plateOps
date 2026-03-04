@@ -115,9 +115,10 @@ jobs:
         uses: azure/login@v2
         with:
           # Autenticação via Service Principal + OIDC (sem publish profile).
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_87D6C28D45C14115ABB2F26A632AA027 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C070278D3D16468ABF9DB5ED9ACFEF23 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4D41E40DB08A49E282C3E2C6DB9DDC46 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_95E7EECFF47C47A3B6B2E1D598A93A97 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1C22373ADE1B487CA7DDA73FFFF0841C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D47F965547EF4BFE91AC8F48B887A6D0 }}
+
 
       - name: Resolve Web App resource group
         run: |
@@ -165,4 +166,6 @@ jobs:
           slot-name: 'Production'
           # Pacote a ser publicado (conteúdo baixado do artifact).
           package: .
+          
+
           
