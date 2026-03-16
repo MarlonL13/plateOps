@@ -7,6 +7,7 @@ import { getAllOrdersCashier } from "../../controllers/orders/gellAllOrdersCashi
 import { getTableData } from "../../controllers/orders/getTableData";
 import { updateOrderStatus } from "../../controllers/orders/updateStatus";
 import { payOrders } from "../../controllers/orders/payOrder";
+import { getOrdersInsights } from "../../controllers/orders/getInsights";
 
 export const ordersRouter = Router();
 
@@ -24,6 +25,9 @@ ordersRouter.get("/cashier", requireAuth, getAllOrdersCashier);
 
 // Get detailed data for a specific table
 ordersRouter.post("/table", requireAuth, getTableData);
+
+// Insights for operational dashboard
+ordersRouter.get("/insights", requireAuth, getOrdersInsights);
 
 // Update order status (pending -> in progress -> ready)
 ordersRouter.post("/update-status", requireAuth, updateOrderStatus);

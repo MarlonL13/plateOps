@@ -9,6 +9,7 @@ PlateOps is a comprehensive, full-stack restaurant management system designed to
 - **Waiter Workflow**: Waiters can view a real-time status map of all tables, select a table, and create new orders from a categorized menu.
 - **Kitchen Display System (KDS)**: The kitchen staff has a dedicated view to see incoming orders, move them from "Pending" to "In Progress," and finally mark them as "Ready" for pickup.
 - **Cashier & Payment**: Cashiers have an overview of all tables, their current status, item count, and total bill. They can select a table to view a detailed breakdown of all its orders and process the final payment.
+- **Operational Insights**: A new analytics endpoint powers KPI dashboards (orders, revenue, prep time, hourly load, top-selling items, and busiest tables).
 - **Secure Authentication**: User authentication is handled via JWT, with passwords securely hashed using bcrypt.
 
 ## Tech Stack
@@ -125,3 +126,4 @@ Key endpoints include:
 - `GET /api/orders/cashier`: Get a summary of all tables with active orders (for Cashier).
 - `POST /api/orders/table`: Get detailed order and item data for a specific table to generate a bill.
 - `POST /api/orders/pay`: Mark all active orders for a table as PAID.
+- `GET /api/orders/insights?range=today|7d|30d`: Get operational analytics and KPI aggregates (kpis, hourly load, peak hour, top items, waiter leaderboard, category mix, table snapshot).
